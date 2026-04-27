@@ -1,6 +1,6 @@
 <?php
 
-abstract class Pkmn {
+abstract class pkmn {
 
     protected ?int $id = null;
     protected string $nombre;
@@ -64,13 +64,13 @@ abstract class Pkmn {
         $ind = rand(1,100);
         if ($ind <= 80 ) {
 
-            return new PkmnComun($nombre, $t1, $t2);
+            return new pkmnComun($nombre, $t1, $t2);
         } elseif ($ind <= 89 ) {
-                return new PkmnPseudoLegendario($nombre, $t1, $t2);
+                return new pkmnPseudoLegendario($nombre, $t1, $t2);
             } elseif ($ind <= 95) {
-                    return new PkmnMitico($nombre, $t1, $t2);
+                    return new pkmnMitico($nombre, $t1, $t2);
                 }else {
-                        return new PkmnLegendario($nombre, $t1, $t2);
+                        return new pkmnLegendario($nombre, $t1, $t2);
                     }
     }
 }
