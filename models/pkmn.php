@@ -31,10 +31,14 @@ abstract class pkmn {
     abstract protected function getRarezaNombre();
 
     public function getId() {return $this -> id;}
+    public function setId(int $id) {$this -> id = $id;}
+    public function setNombre(string $nombre) {$this -> nombre = $nombre;}
     public function getTipo1() {return $this -> tipo1;}
     public function getTipo2() {return $this -> tipo2;}
     public function getShiny() {return $this -> shiny;}
     public function getRareza() {return $this -> rareza;}
+    public function getNombre() {return $this -> nombre;}
+    public function getStats() { return $this -> stats;}
 
     private function  AsignarStats(){
         $totalPuntos = $this -> getPuntosClase();
