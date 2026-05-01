@@ -1,6 +1,6 @@
 <?php
-require_once "autoload.php";
 session_start();
+require_once "autoload.php";
 
 $gestorOG=new GestorPDO();
 $controller = new pkmnController($gestorOG);

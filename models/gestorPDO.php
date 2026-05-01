@@ -1,6 +1,6 @@
 <?php
 
-class gestorPDO {
+class GestorPDO {
     private $db;
 
     public function __construct(){

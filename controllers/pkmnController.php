@@ -1,6 +1,6 @@
 <?php
 
-class pkmnController {
+class PkmnController {
 
     private $gestorControl;
 
@@ -57,4 +57,24 @@ class pkmnController {
         header("Location: index.php");
         exit;
     }
+
+    public function cambiarColor() {
+    if (isset($_POST['color'])) {
+        $colorSeleccionado = $_POST['color'];
+        
+        // Creamos la cookie (duración de 30 días como hizo el profesor)
+        setcookie(
+            "pokedex_color", 
+            $colorSeleccionado, 
+            [
+                'expires' => time() + (86400 * 30),
+                'path' => '/',
+                'httponly' => true,
+                'samesite' => 'Strict'
+            ]
+        );
+    }
+    header("Location: index.php");
+    exit;
+}
 }

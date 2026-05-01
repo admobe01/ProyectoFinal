@@ -1,218 +1,358 @@
+<?php 
+$bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9'; 
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokédex Procedural</title>
-    <style>
-        /* --- ESTILOS GENERALES --- */
-        body {
-            background-color: #f4f4f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+<style>
+    /* --- ESTILOS GENERALES --- */
+    body {
+        background-color: <?php echo $bg_color; ?> !important; /* Persistencia del tema */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        transition: background-color 0.5s ease;
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    /* --- CABECERA Y ACCIONES (NUEVO LAYOUT) --- */
+    .pokedex-header {
+        text-align: center;
+        margin-bottom: 60px; /* Aire antes de las tarjetas */
+    }
 
-        .btn-capturar {
-            background-color: #ff4444;
-            color: white;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(255, 68, 68, 0.3);
-            transition: background 0.3s;
-        }
+    .pokedex-header h1 {
+        margin-bottom: 5px;
+    }
 
-        .btn-capturar:hover {
-            background-color: #cc0000;
-        }
+    .header-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px; /* Aire entre el botón de capturar y los ajustes */
+        margin-top: 20px;
+    }
 
-        /* --- GRID DE LA POKÉDEX --- */
-        .pokedex-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    /* Botones y Enlaces de la Cabecera */
+    .btn-capturar {
+        background-color: #ff4444;
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        transition: transform 0.2s;
+        display: inline-block;
+    }
 
-        /* --- TARJETA DEL POKÉMON --- */
-        .pkmn-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-            overflow: hidden;
-            border: 1px solid #eee;
-        }
+    .btn-capturar:hover {
+        transform: scale(1.05);
+    }
 
-        .pkmn-card:hover {
-            transform: translateY(-10px);
-        }
+    .guest-msg {
+        font-size: 1.1em;
+        color: #555;
+    }
 
-        /* Cabecera de la tarjeta */
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+    .link-auth {
+        color: #ff4444;
+        font-weight: bold;
+        text-decoration: none;
+    }
 
-        .pkmn-id {
-            font-weight: bold;
-            color: #bbb;
-            font-size: 1.2em;
-        }
+    /* Barra Inferior (Ajustes y Usuario) */
+    .settings-bar {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 12px 30px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 40px; /* Aire entre Temas y Usuario */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid #eee;
+    }
 
-        /* Badges de Rareza */
-        .badge {
-            font-size: 0.7em;
-            padding: 4px 10px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            font-weight: bold;
-            color: white;
-        }
-        .badge-comun { background: #919191; }
-        .badge-pseudolegendario { background: #4a90e2; }
-        .badge-mitico { background: #a33ea1; }
-        .badge-legendario { 
-            background: linear-gradient(45deg, #ff4400, #ffcc00); 
-            box-shadow: 0 0 8px rgba(255, 68, 0, 0.5);
-        }
+    .theme-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        /* Contenedor del Sprite */
-        .sprite-container {
-            background: #f9f9f9;
-            border-radius: 50%;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+    .color-options {
+        display: flex;
+        gap: 8px;
+    }
 
-        .pkmn-sprite {
-            width: 100px;
-            height: 100px;
-            z-index: 2;
-        }
+    .color-dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s, border-color 0.2s;
+        display: inline-block;
+    }
 
-        /* Efecto Shiny */
-        .is-shiny {
-            border: 2px solid #ffd700;
-            background: linear-gradient(135deg, #fffdf5 0%, #ffffff 100%);
-        }
+    .color-dot:hover {
+        transform: scale(1.2);
+        border-color: #ccc;
+    }
 
-        .particles {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 1.5em;
-            animation: bounce 1.5s infinite;
-            z-index: 1;
-        }
+    /* Colores de las Piedras de Tema */
+    .default { background-color: #f4f4f9; }
+    .electric { background-color: #ffeb3b; }
+    .fire { background-color: #ffcdd2; }
+    .water { background-color: #bbdefb; }
+    .grass { background-color: #c8e6c9; }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); opacity: 0.5; }
-            50% { transform: translateY(-10px); opacity: 1; }
-        }
+    /* Badge del Usuario Logueado */
+    .user-badge {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 2px solid #ddd;
+        padding-left: 20px;
+    }
 
-        /* Nombre y Tipos */
-        .pkmn-name {
-            margin: 10px 0;
-            font-size: 1.5em;
-            text-transform: capitalize;
-        }
+    .user-name {
+        font-size: 0.95em;
+        font-weight: 600;
+        color: #444;
+    }
 
-        .types-row {
-            margin-bottom: 15px;
-        }
+    .logout-x {
+        color: #ff4444;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.1em;
+        transition: transform 0.2s;
+    }
+    
+    .logout-x:hover { transform: scale(1.2); }
 
-        .type-pill {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: bold;
-            color: white;
-            background: #ccc;
-            margin: 0 2px;
-            text-transform: uppercase;
-        }
+    /* --- GRID DE LA POKÉDEX --- */
+    .pokedex-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
 
-        /* Colores por tipo (añade los que necesites) */
-        .type-fuego { background-color: #ff4422; }
-        .type-agua { background-color: #3399ff; }
-        .type-planta { background-color: #77cc55; }
-        .type-electrico { background-color: #ffcc33; }
-        .type-psiquico { background-color: #ff5599; }
-        .type-normal { background-color: #aaaa99; }
+    /* --- TARJETA DEL POKÉMON --- */
+    .pkmn-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
 
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            background: #f8f8f8;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
+    .pkmn-card:hover {
+        transform: translateY(-10px);
+    }
 
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-        }
+    /* Cabecera de la tarjeta */
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
 
-        .stat-label {
-            font-size: 0.6em;
-            color: #888;
-            font-weight: bold;
-        }
+    .pkmn-id {
+        font-weight: bold;
+        color: #bbb;
+        font-size: 1.2em;
+    }
 
-        .stat-value {
-            font-size: 0.9em;
-            font-weight: bold;
-        }
+    /* Badges de Rareza */
+    .badge {
+        font-size: 0.7em;
+        padding: 4px 10px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        font-weight: bold;
+        color: white;
+    }
+    .badge-comun { background: #919191; }
+    .badge-pseudolegendario { background: #4a90e2; }
+    .badge-mitico { background: #a33ea1; }
+    .badge-legendario { 
+        background: linear-gradient(45deg, #ff4400, #ffcc00); 
+        box-shadow: 0 0 8px rgba(255, 68, 0, 0.5);
+    }
 
-        /* Acciones */
-        .card-actions {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
+    /* Contenedor del Sprite */
+    .sprite-container {
+        background: #f9f9f9;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
 
-        .action-link {
-            text-decoration: none;
-            font-size: 1.2em;
-            transition: transform 0.2s;
-        }
+    .pkmn-sprite {
+        width: 100px;
+        height: 100px;
+        z-index: 2;
+    }
 
-        .action-link:hover {
-            transform: scale(1.2);
-        }
-    </style>
+    /* Efecto Shiny */
+    .is-shiny {
+        border: 2px solid #ffd700;
+        background: linear-gradient(135deg, #fffdf5 0%, #ffffff 100%);
+    }
+
+    .particles {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 1.5em;
+        animation: bounce 1.5s infinite;
+        z-index: 1;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); opacity: 0.5; }
+        50% { transform: translateY(-10px); opacity: 1; }
+    }
+
+    /* Nombre y Tipos */
+    .pkmn-name {
+        margin: 10px 0;
+        font-size: 1.5em;
+        text-transform: capitalize;
+        text-align: center;
+    }
+
+    .types-row {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .type-pill {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 0.8em;
+        font-weight: bold;
+        color: white;
+        background: #ccc;
+        margin: 0 2px;
+        text-transform: uppercase;
+    }
+
+    /* Colores por tipo */
+    .type-fuego { background-color: #ff4422; }
+    .type-agua { background-color: #3399ff; }
+    .type-planta { background-color: #77cc55; }
+    .type-electrico { background-color: #ffcc33; }
+    .type-psiquico { background-color: #ff5599; }
+    .type-normal { background-color: #aaaa99; }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        background: #f8f8f8;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 0.6em;
+        color: #888;
+        font-weight: bold;
+    }
+
+    .stat-value {
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    /* Acciones en la Tarjeta */
+    .card-actions {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+    }
+
+    .action-link {
+        text-decoration: none;
+        font-size: 1.2em;
+        transition: transform 0.2s;
+    }
+
+    .action-link:hover {
+        transform: scale(1.2);
+    }
+</style>
 </head>
 <body>
 
-<header>
+<header class="pokedex-header">
     <h1>Mi Pokédex Procedural</h1>
-    <a href="index.php?accion=crear" class="btn-capturar">Capturar Nuevo Pokémon</a>
+
+    <div class="header-container">
+        <!-- 1. Fila de Acción Principal (Privada vs Pública) -->
+        <div class="action-row">
+            <?php if (isset($_SESSION['usuario_id'])): ?>
+                <!-- Funcionalidad exclusiva: Solo aparece si está autenticado[cite: 1] -->
+                <a href="index.php?accion=crear" class="btn-capturar">Capturar Nuevo Pokémon</a>
+            <?php else: ?>
+                <!-- Mensaje para invitados -->
+                <p class="guest-msg">
+                    <a href="index.php?accion=login" class="link-auth">Inicia sesión</a> para gestionar tu colección.
+                </p>
+            <?php endif; ?>
+        </div>
+
+        <!-- 2. Barra de Ajustes y Usuario (Persistencia y Sesión) -->
+        <div class="settings-bar">
+            
+            <!-- Selector de Temas (Persistencia mediante Cookies) -->
+            <div class="theme-wrapper">
+                <span>Tema:</span>
+                <div class="color-options">
+                    <a href="index.php?accion=cambiarColor&color=#f4f4f9" class="color-dot default" title="Normal"></a>
+                    <a href="index.php?accion=cambiarColor&color=#ffeb3b" class="color-dot electric" title="Eléctrico"></a>
+                    <a href="index.php?accion=cambiarColor&color=#ffcdd2" class="color-dot fire" title="Fuego"></a>
+                    <a href="index.php?accion=cambiarColor&color=#bbdefb" class="color-dot water" title="Agua"></a>
+                    <a href="index.php?accion=cambiarColor&color=#c8e6c9" class="color-dot grass" title="Planta"></a>
+                </div>
+            </div>
+
+            <?php if (isset($_SESSION['entrenadorNombre'])): ?>
+                <div class="user-badge">
+                    <span class="user-name"><?php echo $_SESSION['usuarioEmail']; ?></span>
+                    <a href="index.php?accion=logout" class="logout-x" title="Cerrar Sesión">✕</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 </header>
 
 <main class="pokedex-grid">
