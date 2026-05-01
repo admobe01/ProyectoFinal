@@ -1,6 +1,6 @@
 <?php
 
-abstract class pkmn {
+abstract class Pkmn {
 
     protected ?int $id = null;
     protected string $nombre;

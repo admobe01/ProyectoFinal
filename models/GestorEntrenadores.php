@@ -3,7 +3,7 @@ class GestorEntrenadores {
     private $db;
 
     public function __construct() {
-        $this->db = connection::getInstance()->getConn();
+        $this->db = Connection::getInstance()->getConn();
     }
 
     public function registrarEntrenador(Entrenador $e): bool {

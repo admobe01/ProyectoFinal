@@ -1,5 +1,5 @@
 <?php
-class pkmnComun extends pkmn {
+class PkmnComun extends Pkmn {
 
     protected function getPuntosClase() {return 400;}
     protected function getRarezaNombre(){ return "Comun";}
