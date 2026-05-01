@@ -1,0 +1,6 @@
+{
+    "host": "db",
+    "db": "Pokedex",
+    "userName": "root",
+    "password": "test"
+}

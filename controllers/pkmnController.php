@@ -1,0 +1,60 @@
+<?php
+
+class pkmnController {
+
+    private $gestorControl;
+
+    public function __construct($gestorOG) {
+        $this->gestorControl = $gestorOG;
+    }
+
+    public function index() {
+        $pkmn = $this->gestorControl->listar();
+        include "views/listar.php";
+    }
+
+    public function crear() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nombre = $_POST['nombre'];
+            $tipo1 = $_POST['tipo1'];
+            $tipo2 = !empty($_POST['tipo2']) ? $_POST['tipo2'] : null;
+            
+            $pkmn = pkmn::crear($nombre, $tipo1, $tipo2);
+            $this->gestorControl->agregar($pkmn);
+
+            header("Location: index.php");
+            exit;
+        }
+
+        include "views/crear.php";
+    }
+
+    public function editar() {
+        $id = $_GET['id'] ?? null;
+        $pkmn = ($this -> gestorControl -> buscar($id));
+
+    if($pkmn == null) {
+        header("Location: index.php");
+        exit;
+    }
+        if($_SERVER['REQUEST_METHOD'] === 'POST') {
+            
+            $pkmn -> setNombre($_POST['nombre']);
+            $this->gestorControl->modificar($pkmn);
+
+            header("Location:index.php");
+            exit;
+        }
+        include "views/editar.php";
+
+    }
+
+    public function eliminar() {
+        $id = $_GET['id'] ?? null;    
+        if($id) {
+            $this -> gestorControl -> eliminar($id);
+        }
+        header("Location: index.php");
+        exit;
+    }
+}

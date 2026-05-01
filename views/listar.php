@@ -1,53 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Listado de Productos</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
 <body>
-   <div style="background-color: #f0f0f0; padding: 10px; margin-bottom: 20px;">
-       <?php if (isset($_SESSION['usuario_id'])): ?>
-          Bienvenido, <b><?= $_SESSION['usuario_email'] ?></b> |
-           <a href="index.php?accion=logout">Cerrar Sesión</a>
-       <?php else: ?>
-           <a href="index.php?accion=login">Iniciar Sesión</a> | 
-           <a href="index.php?accion=registro">Registrarse</a>
-       <?php endif; ?>
-   </div>
- 
-  <h1>Productos</h1>
- 
-   <?php if (isset($_SESSION['usuario_id'])): ?>
-       <a href="index.php?accion=crear">Agregar Producto</a><br><br>
-   <?php endif; ?>
- 
-   <table border="1" cellpadding="10">
-       <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Eléctrica</th>
-           <?php if (isset($_SESSION['usuarioId'])): ?>
-              <th>Acciones</th>
-           <?php endif; ?>
-       </tr>
- 
-       <?php foreach ($productos as $p): ?>
-       <tr>
-          <td><?= $p->getId() ?></td>
-          <td><?= $p->getNombre() ?></td>
-          <td><?= $p->getPrecio() ?></td>
-          <td><?= ($p->getElectrica() == 0) ? "Muscular" : "Eléctrica"; ?></td>
-          
-           <?php if (isset($_SESSION['usuarioId'])): ?>
-           <td>
-               <a href="index.php?accion=editar&id=<?= $p->getId() ?>">Editar</a>
-               |
-               <a href="index.php?accion=eliminar&id=<?= $p->getId() ?>">Eliminar</a>
-          </td>
-           <?php endif; ?>
-       </tr>
-       <?php endforeach; ?>
- 
-   </table>
+    <h2>Mi Pokedex</h2>
+<a href="index.php?action=crear">Capturar otro</a>
+
+<table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%; text-align: center;">
+    <thead>
+        <tr style="background-color: #eee;">
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Tipos</th>
+            <th>Stats</th>
+            <th>Rareza</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($pkmn as $p): ?>
+            <?php $s = $p->getStats(); ?>
+            <tr>
+                <td><?= $p->getId() ?></td>
+                <td class="<?= $p->getShiny() ? 'nombre-shiny' : '' ?>">
+                    <strong><?= $p->getNombre() ?></strong>
+                </td>
+                <td>
+                    <?= $p->getTipo1() ?> <?= $p->getTipo2() ? "/ " . $p->getTipo2() : "" ?>
+                </td>
+                <td>
+                    HP: <?= $s['hp'] ?> | AT: <?= $s['ataque'] ?> | DF: <?= $s['defensa'] ?>
+                </td>
+                <td><?= $p->getRareza() ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
 </body>
 </html>

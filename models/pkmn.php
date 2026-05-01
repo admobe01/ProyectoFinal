@@ -39,6 +39,12 @@ abstract class pkmn {
     public function getRareza() {return $this -> rareza;}
     public function getNombre() {return $this -> nombre;}
     public function getStats() { return $this -> stats;}
+    public function setDatosRelatados(int $id, array $stats, bool $shiny, string $rareza) {
+        $this->id = $id;
+        $this->stats = $stats;
+        $this->shiny = $shiny;
+        $this->rareza = $rareza;
+    } //Esto se usa para evitar que se generen nuevos stats, rareza y shiny cuando se listan los objetos
 
     private function  AsignarStats(){
         $totalPuntos = $this -> getPuntosClase();
@@ -77,5 +83,6 @@ abstract class pkmn {
                         return new pkmnLegendario($nombre, $t1, $t2);
                     }
     }
+
 }
 ?>
