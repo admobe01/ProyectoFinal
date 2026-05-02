@@ -7,19 +7,16 @@ class GestorPDO {
         $this -> db = Connection::getInstance()->getConn();
     }
 
-    public function listar() {
-    
+public function listar() {
     $arrayPkmn = [];
+    $consulta = "SELECT * FROM pokemon";
+    $rtdo = $this->db->query($consulta);
 
-        $consulta = "SELECT * FROM pokemon";
-        $rtdo=$this -> db -> query($consulta);
+    while ($value = $rtdo->fetch(PDO::FETCH_ASSOC)) {
+        // Instanciamos la clase hija según la rareza 
+        $nombreClase = "Pkmn" . ucfirst(strtolower($value['rareza'])); 
+        $p = new $nombreClase($value['nombre'], $value['tipo1'], $value['tipo2']);
 
-        while ($value = $rtdo->fetch(PDO::FETCH_ASSOC)) {
-            $pkmn = "pkmn" . $value['rareza']; //Se busca la rareza del pkmn en el que este el fetch
-
-            $p = new $pkmn($value['nombre'], $value['tipo1'] , $value['tipo2']); //creamos el objeto pero tiene stats aleatorios, no fieles a la bbdd
-
-        //Se crea un array asociativo al cual con el setDatosRelatados vamos a pisarlos con los originales
         $statsRecuperados = [
             'hp' => $value['hp'],
             'ataque' => $value['ataque'],
@@ -29,16 +26,23 @@ class GestorPDO {
             'velocidad' => $value['velocidad']
         ];
 
-        $p->setDatosRelatados($value['id'], $statsRecuperados, $value['shiny'], $value['rareza']);
+
+        $p->setDatosRelatados(
+            $value['id'], 
+            $statsRecuperados, 
+            $value['shiny'], 
+            $value['rareza'], 
+            $value['entrenador_id'] 
+        );
 
         $arrayPkmn[] = $p;
-        }
-        return $arrayPkmn;
     }
+    return $arrayPkmn;
+}
 
 public function agregar(pkmn $p, int $idEntrenador) {
     try {
-        
+
         $sql = "INSERT INTO pokemon (nombre, tipo1, tipo2, hp, ataque, defensa, ataque_esp, defensa_esp, velocidad, rareza, shiny, entrenador_id) 
                 VALUES (:nom, :t1, :t2, :hp, :atq, :def, :atq_esp, :def_esp, :vel, :rar, :shi, :eid)";
         
@@ -48,7 +52,7 @@ public function agregar(pkmn $p, int $idEntrenador) {
 
         $stmt->bindValue(':nom', $p->getNombre());
         $stmt->bindValue(':t1', $p->getTipo1());
-        $stmt->bindValue(':t2', $p->getTipo2());
+        $stmt->bindValue(':t2', $p->getTipo2(), $p->getTipo2() === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
         $stmt->bindValue(':hp', $stats['hp']);
         $stmt->bindValue(':atq', $stats['ataque']);
         $stmt->bindValue(':def', $stats['defensa']);
@@ -101,15 +105,23 @@ public function buscar($id) {
     return null;
 }
 
-    public function eliminar($id, $idEntrenador) {
+    public function eliminar($id, $idEntrenador, $esAdmin = 0) {
+        if ($esAdmin == 1) {
+            // Si es admin, borramos sin importar el dueño
+            $sql = "DELETE FROM pokemon WHERE id = :id";
+            $stmt = $this->db->prepare($sql);
+        } else {
+            // Si no es admin, filtramos por id de entrenador para seguridad
+            $sql = "DELETE FROM pokemon WHERE id = :id AND entrenador_id = :eid";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':eid', $idEntrenador);
+        }
 
-        $sql = "DELETE FROM pokemon WHERE id = :id AND entrenador_id = :eid";
-        $stmt = $this->db->prepare($sql);
+        // El ID siempre se vincula, sea admin o no
         $stmt->bindValue(':id', $id);
-        $stmt->bindValue(':eid', $idEntrenador); // solamente borra cuando coincida el id de entrenador
+        
         return $stmt->execute();
     }
-
     public function modificar(pkmn $p) {
     // Lo unico razonable a editar es su mote
     $sql = "UPDATE pokemon SET nombre = :nom WHERE id = :id";

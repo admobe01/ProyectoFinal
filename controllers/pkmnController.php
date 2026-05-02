@@ -17,10 +17,9 @@ class PkmnController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = $_POST['nombre'];
             $tipo1 = $_POST['tipo1'];
-            $tipo2 = !empty($_POST['tipo2']) ? $_POST['tipo2'] : null;
-            
+            $tipo2 = (!empty($_POST['tipo2']) && $_POST['tipo2'] !== $tipo1) ? $_POST['tipo2'] : null;            
             $pkmn = Pkmn::crear($nombre, $tipo1, $tipo2);
-            $this->gestorControl->agregar($pkmn);
+            $this->gestorControl->agregar($pkmn, $_SESSION['entrenador_id']);
 
             header("Location: index.php");
             exit;
@@ -50,7 +49,6 @@ class PkmnController {
     }
 
     public function eliminar() {
-        // Verificamos que hay alguien logueado
         if (!isset($_SESSION['entrenador_id'])) {
             header("Location: index.php?accion=login");
             exit;
@@ -58,17 +56,17 @@ class PkmnController {
 
         $idABorrar = $_GET['id'] ?? null;
         $idLogueado = $_SESSION['entrenador_id'];
+        $esAdmin = $_SESSION['es_admin'] ?? 0; 
 
         $pokemon = $this->gestorControl->buscar($idABorrar);
 
         if ($pokemon) {
-            // Verificamos la propiedad
-            if ($pokemon->getEntrenadorId() == $idLogueado) {
-                $this->gestorControl->eliminar($idABorrar, $idLogueado);
+            // Verificamos la propiedad O si es Administrador
+            if ($pokemon->getEntrenadorId() == $idLogueado || $esAdmin == 1) {
+            $this->gestorControl->eliminar($idABorrar, $idLogueado, $esAdmin);
             }
         }
 
-        // 4. Redirigimos siempre a la lista
         header("Location: index.php");
         exit;
     }

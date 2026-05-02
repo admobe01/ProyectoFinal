@@ -244,24 +244,36 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
     }
 
     .type-pill {
-        display: inline-block;
-        padding: 5px 15px;
-        border-radius: 15px;
-        font-size: 0.8em;
-        font-weight: bold;
-        color: white;
-        background: #ccc;
-        margin: 0 2px;
-        text-transform: uppercase;
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    margin: 0 2px;
+    text-transform: uppercase;
     }
 
-    /* Colores por tipo */
-    .type-fuego { background-color: #ff4422; }
-    .type-agua { background-color: #3399ff; }
-    .type-planta { background-color: #77cc55; }
-    .type-electrico { background-color: #ffcc33; }
-    .type-psiquico { background-color: #ff5599; }
-    .type-normal { background-color: #aaaa99; }
+
+    .type-acero      { background-color: #B7B7CE; }
+    .type-agua       { background-color: #6390F0; }
+    .type-bicho      { background-color: #A6B91A; }
+    .type-dragon     { background-color: #6F35FC; }
+    .type-electrico  { background-color: #F7D02C; color: #333; text-shadow: none; } /* Texto oscuro para mejor lectura */
+    .type-fantasma   { background-color: #735797; }
+    .type-fuego      { background-color: #EE8130; }
+    .type-hada       { background-color: #D685AD; }
+    .type-hielo      { background-color: #96D9D6; color: #333; text-shadow: none; }
+    .type-lucha      { background-color: #C22E28; }
+    .type-normal     { background-color: #A8A77A; } 
+    .type-planta     { background-color: #7AC74C; }
+    .type-psiquico   { background-color: #F95587; }
+    .type-roca       { background-color: #B6A136; }
+    .type-siniestro  { background-color: #705746; }
+    .type-tierra     { background-color: #E2BF65; }
+    .type-veneno     { background-color: #6B246B; }
+    .type-volador    { background-color: #A98FF3; }
 
     /* Stats Grid */
     .stats-grid {
@@ -319,7 +331,7 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
     <div class="header-container">
         <!-- 1. Fila de Acción Principal (Privada vs Pública) -->
         <div class="action-row">
-            <?php if (isset($_SESSION['usuario_id'])): ?>
+            <?php if (isset($_SESSION['entrenador_id'])): ?>
                 <!-- Funcionalidad exclusiva: Solo aparece si está autenticado[cite: 1] -->
                 <a href="index.php?accion=crear" class="btn-capturar">Capturar Nuevo Pokémon</a>
             <?php else: ?>
@@ -347,7 +359,7 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
 
             <?php if (isset($_SESSION['entrenadorNombre'])): ?>
                 <div class="user-badge">
-                    <span class="user-name"><?php echo $_SESSION['usuarioEmail']; ?></span>
+                    <span class="user-name"><?php echo $_SESSION['entrenadorNombre']; ?></span>
                     <a href="index.php?accion=logout" class="logout-x" title="Cerrar Sesión">✕</a>
                 </div>
             <?php endif; ?>
@@ -369,12 +381,24 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
                     </span>
                 </div>
 
-                <div class="sprite-container">
-                    <?php if($p->getShiny()): ?>
+                    <div class="sprite-container">
+                    <?php 
+                    // 1. Usamos el ID único del Pokémon para fijar el azar
+                    srand($p->getId()); 
+                    $idVisualFijo = rand(1, 1025); 
+                    
+                    // 2. IMPORTANTE: Reseteamos la semilla para no afectar a otros procesos de PHP
+                    srand(); 
+
+                    if($p->getShiny()): 
+                    ?>
                         <div class="particles">✨</div>
+                        <!-- Sprite Shiny Aleatorio (pero fijo para este ID) -->
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/<?php echo $idVisualFijo; ?>.png" alt="Sprite Shiny" class="pkmn-sprite">
+                    <?php else: ?>
+                        <!-- Arte Oficial Aleatorio (pero fijo para este ID) -->
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/<?php echo $idVisualFijo; ?>.png" alt="Arte Oficial" class="pkmn-sprite">
                     <?php endif; ?>
-                    <!-- Robohash genera un sprite único basado en el ID -->
-                    <img src="https://robohash.org/<?php echo $p->getId(); ?>?set=set2&size=150x150" alt="Sprite" class="pkmn-sprite">
                 </div>
 
                 <h2 class="pkmn-name"><?php echo $p->getNombre(); ?></h2>
@@ -391,22 +415,44 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
                 </div>
 
                 <div class="stats-grid">
-                    <?php foreach ($p->getStats() as $nombre => $valor): ?>
+                    <?php 
+                    // Mapeo de nombres de la base de datos a siglas clásicas
+                    $siglas = [
+                        'hp'              => 'HP',
+                        'ataque'          => 'ATT',
+                        'defensa'         => 'DEF',
+                        'ataqueEspecial'  => 'S.ATT',
+                        'defensaEspecial' => 'S.DEF',
+                        'velocidad'       => 'VEL'
+                    ];
+
+                    foreach ($p->getStats() as $nombre => $valor): 
+                        // Usamos la sigla definida o el nombre en mayúsculas como plan B
+                        $etiqueta = $siglas[$nombre] ?? strtoupper($nombre);
+                    ?>
                         <div class="stat-item">
-                            <span class="stat-label"><?php echo strtoupper(substr($nombre, 0, 3)); ?></span>
+                            <span class="stat-label"><?php echo $etiqueta; ?></span>
                             <span class="stat-value"><?php echo $valor; ?></span>
                         </div>
                     <?php endforeach; ?>
                 </div>
+<div class="card-actions">
+    <?php 
+    // Ahora permitimos gestionar si es el DUEÑO o si tiene rango de ADMIN
+    $esSuEntrenador = (isset($_SESSION['entrenador_id']) && $p->getEntrenadorId() == $_SESSION['entrenador_id']);
+    $esAdmin  = (isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1);
 
-                <div class="card-actions">
-                    <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>" class="action-link" title="Editar Mote">📝</a>
-                    <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>" 
-                       class="action-link" 
-                       onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
-                       title="Liberar">🗑️</a>
-                </div>
-            </div>
+    if ($esSuEntrenador || $esAdmin): 
+    ?>
+        <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>" class="action-link" title="Editar Mote">📝</a>
+        <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>" 
+           class="action-link" 
+           onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
+           title="Liberar">🗑️</a>
+    <?php else: ?>
+        <span style="color: #ccc; font-size: 0.7em;">Solo lectura</span>
+    <?php endif; ?>
+</div>
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
