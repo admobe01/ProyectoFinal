@@ -16,6 +16,7 @@ abstract class Pkmn {
     ];
     protected string $rareza;
     protected bool $shiny;
+    protected int $entrenador_id;
 
     public function __construct(string $nombre, string $tipo1, ?string $tipo2 = null){
         $this -> nombre = $nombre;
@@ -39,12 +40,15 @@ abstract class Pkmn {
     public function getRareza() {return $this -> rareza;}
     public function getNombre() {return $this -> nombre;}
     public function getStats() { return $this -> stats;}
-    public function setDatosRelatados(int $id, array $stats, bool $shiny, string $rareza) {
-        $this->id = $id;
-        $this->stats = $stats;
-        $this->shiny = $shiny;
-        $this->rareza = $rareza;
-    } //Esto se usa para evitar que se generen nuevos stats, rareza y shiny cuando se listan los objetos
+    public function getEntrenadorId() {return $this->entrenador_id;}
+
+    public function setDatosRelatados($id, $stats, $shiny, $rareza, $entrenador_id = null) {
+    $this->id = $id;
+    $this->stats = $stats;
+    $this->shiny = $shiny;
+    $this->rareza = $rareza;
+    $this->entrenador_id = $entrenador_id;
+} //Esto se usa para evitar que se generen nuevos stats, rareza y shiny cuando se listan los objetos
 
     private function  AsignarStats(){
         $totalPuntos = $this -> getPuntosClase();

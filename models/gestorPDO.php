@@ -36,50 +36,46 @@ class GestorPDO {
         return $arrayPkmn;
     }
 
-    public function agregar(pkmn $p) {
+public function agregar(pkmn $p, int $idEntrenador) {
     try {
-        // Preparamos la consulta con los nombres de columnas de tu imagen
-        $sql = "INSERT INTO pokemon (nombre, tipo1, tipo2, hp, ataque, defensa, ataque_esp, defensa_esp, velocidad, rareza, shiny) 
-                VALUES (:nom, :t1, :t2, :hp, :atq, :def, :atq_esp, :def_esp, :vel, :rar, :shi)";
+        
+        $sql = "INSERT INTO pokemon (nombre, tipo1, tipo2, hp, ataque, defensa, ataque_esp, defensa_esp, velocidad, rareza, shiny, entrenador_id) 
+                VALUES (:nom, :t1, :t2, :hp, :atq, :def, :atq_esp, :def_esp, :vel, :rar, :shi, :eid)";
         
         $stmt = $this->db->prepare($sql);
 
-        // Extraemos el array de stats que hemos preparado en el padre
         $stats = $p->getStats();
 
-        $stmt -> bindValue(':nom', $p -> getNombre());
-        $stmt -> bindValue(':t1', $p -> getTipo1());
-        $stmt -> bindValue(':t2', $p -> getTipo2());
-        $stmt -> bindValue(':hp', $stats['hp']);
-        $stmt -> bindValue(':atq', $stats['ataque']);
-        $stmt -> bindValue(':def', $stats['defensa']);
-        
+        $stmt->bindValue(':nom', $p->getNombre());
+        $stmt->bindValue(':t1', $p->getTipo1());
+        $stmt->bindValue(':t2', $p->getTipo2());
+        $stmt->bindValue(':hp', $stats['hp']);
+        $stmt->bindValue(':atq', $stats['ataque']);
+        $stmt->bindValue(':def', $stats['defensa']);
         $stmt->bindValue(':atq_esp', $stats['ataqueEspecial']);
         $stmt->bindValue(':def_esp', $stats['defensaEspecial']);
-        
         $stmt->bindValue(':vel', $stats['velocidad']);
-        $stmt->bindValue(':rar', $p -> getRareza());
-        
-        // Indicar a la bbdd que es tipo booleano
+        $stmt->bindValue(':rar', $p->getRareza());
         $stmt->bindValue(':shi', $p->getShiny(), PDO::PARAM_BOOL);
+        $stmt->bindValue(':eid', $idEntrenador, PDO::PARAM_INT);
 
         return $stmt->execute();
 
     } catch (PDOException $e) {
-            return false;
-        }
+        return false;
     }
+}
 
-    public function buscar($id) {
-        $sql = "SELECT * FROM pokemon WHERE id = :id";
-        $stmt = $this -> db -> prepare($sql);
-        $stmt -> bindvalue(':id', $id);
-        $stmt -> execute();
+public function buscar($id) {
+    $sql = "SELECT * FROM pokemon WHERE id = :id";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(':id', $id);
+    $stmt->execute();
 
-        if ($value = $stmt->fetch(PDO::FETCH_ASSOC)) {
-
+    if ($value = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Reconstruimos el objeto según su rareza
-        $nombreClase = "pkmn" . $value['rareza'];
+        // Nota: Asegúrate de que $value['rareza'] coincida con tus clases (Comun, Legendario, etc.)
+        $nombreClase = "Pkmn" . ucfirst($value['rareza']); 
 
         $p = new $nombreClase($value['nombre'], $value['tipo1'], $value['tipo2']);
         
@@ -91,17 +87,27 @@ class GestorPDO {
             'defensaEspecial' => $value['defensa_esp'],
             'velocidad' => $value['velocidad']
         ];
-            $p -> setDatosRelatados($value['id'], $stats, $value['shiny'], $value['rareza']);
+
+        $p->setDatosRelatados(
+            $value['id'], 
+            $stats, 
+            $value['shiny'], 
+            $value['rareza'], 
+            $value['entrenador_id']
+        );
+        
         return $p;
     }
     return null;
-    }
+}
 
-    public function eliminar($id) {
-    $sql = "DELETE FROM pokemon WHERE id = :id";
-    $stmt = $this -> db -> prepare($sql);
-    $stmt->bindValue(':id', $id);
-    return $stmt -> execute();
+    public function eliminar($id, $idEntrenador) {
+
+        $sql = "DELETE FROM pokemon WHERE id = :id AND entrenador_id = :eid";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':id', $id);
+        $stmt->bindValue(':eid', $idEntrenador); // solamente borra cuando coincida el id de entrenador
+        return $stmt->execute();
     }
 
     public function modificar(pkmn $p) {
