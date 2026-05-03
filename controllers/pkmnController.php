@@ -30,22 +30,30 @@ class PkmnController {
 
     public function editar() {
         $id = $_GET['id'] ?? null;
-        $pkmn = ($this -> gestorControl -> buscar($id));
+        $idLogueado = $_SESSION['entrenador_id'] ?? null;
+        $esAdmin = $_SESSION['es_admin'] ?? 0; // Recuperamos el rango
 
-    if($pkmn == null) {
-        header("Location: index.php");
-        exit;
-    }
-        if($_SERVER['REQUEST_METHOD'] === 'POST') {
-            
-            $pkmn -> setNombre($_POST['nombre']);
-            $this->gestorControl->modificar($pkmn);
+        $pkmn = $this -> gestorControl -> buscar($id);
 
-            header("Location:index.php");
+        if ($pkmn == null) {
+            header("Location: index.php");
             exit;
         }
-        include "views/editar.php";
 
+        if ($pkmn -> getEntrenadorId() != $idLogueado && $esAdmin == 0) {
+            header("Location: index.php?error=sin_permiso");
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $pkmn -> setNombre($_POST['nombre']);
+            $this -> gestorControl -> modificar($pkmn);
+
+            header("Location: index.php");
+            exit;
+        }
+        
+        include "views/editar.php";
     }
 
     public function eliminar() {
@@ -72,11 +80,10 @@ class PkmnController {
     }
 
     public function cambiarColor() {
-    if (isset($_POST['color'])) {
-        $colorSeleccionado = $_POST['color'];
-        
-        // Creamos la cookie (duración de 30 días como hizo el profesor)
-        setcookie(
+    if (isset($_GET['color'])) {
+        $colorSeleccionado = $_GET['color'];
+            
+            setcookie(
             "pokedex_color", 
             $colorSeleccionado, 
             [
@@ -91,3 +98,4 @@ class PkmnController {
     exit;
 }
 }
+?>

@@ -1,5 +1,5 @@
 <?php 
-$bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9'; 
+$bg_color = $_COOKIE['pokedex_color'] ?? 'f4f4f9'; 
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +10,7 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
 <style>
     /* --- ESTILOS GENERALES --- */
     body {
-        background-color: <?php echo $bg_color; ?> !important; /* Persistencia del tema */
+        background-color: #<?php echo $bg_color; ?> !important; /* Persistencia del tema */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
         padding: 20px;
@@ -329,31 +329,25 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
     <h1>Mi Pokédex Procedural</h1>
 
     <div class="header-container">
-        <!-- 1. Fila de Acción Principal (Privada vs Pública) -->
         <div class="action-row">
             <?php if (isset($_SESSION['entrenador_id'])): ?>
-                <!-- Funcionalidad exclusiva: Solo aparece si está autenticado[cite: 1] -->
                 <a href="index.php?accion=crear" class="btn-capturar">Capturar Nuevo Pokémon</a>
             <?php else: ?>
-                <!-- Mensaje para invitados -->
                 <p class="guest-msg">
                     <a href="index.php?accion=login" class="link-auth">Inicia sesión</a> para gestionar tu colección.
                 </p>
             <?php endif; ?>
         </div>
 
-        <!-- 2. Barra de Ajustes y Usuario (Persistencia y Sesión) -->
         <div class="settings-bar">
-            
-            <!-- Selector de Temas (Persistencia mediante Cookies) -->
             <div class="theme-wrapper">
                 <span>Tema:</span>
                 <div class="color-options">
-                    <a href="index.php?accion=cambiarColor&color=#f4f4f9" class="color-dot default" title="Normal"></a>
-                    <a href="index.php?accion=cambiarColor&color=#ffeb3b" class="color-dot electric" title="Eléctrico"></a>
-                    <a href="index.php?accion=cambiarColor&color=#ffcdd2" class="color-dot fire" title="Fuego"></a>
-                    <a href="index.php?accion=cambiarColor&color=#bbdefb" class="color-dot water" title="Agua"></a>
-                    <a href="index.php?accion=cambiarColor&color=#c8e6c9" class="color-dot grass" title="Planta"></a>
+                    <a href="index.php?accion=cambiarColor&color=f4f4f9" class="color-dot default" title="Normal"></a>
+                    <a href="index.php?accion=cambiarColor&color=ffeb3b" class="color-dot electric" title="Eléctrico"></a>
+                    <a href="index.php?accion=cambiarColor&color=ffcdd2" class="color-dot fire" title="Fuego"></a>
+                    <a href="index.php?accion=cambiarColor&color=bbdefb" class="color-dot water" title="Agua"></a>
+                    <a href="index.php?accion=cambiarColor&color=c8e6c9" class="color-dot grass" title="Planta"></a>
                 </div>
             </div>
 
@@ -372,6 +366,7 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
         <p style="text-align: center; grid-column: 1 / -1;">No has capturado ningún Pokémon todavía.</p>
     <?php else: ?>
         <?php foreach ($pkmn as $p): ?>
+            <!-- INICIO DE LA TARJETA -->
             <div class="pkmn-card <?php echo $p->getShiny() ? 'is-shiny' : ''; ?>">
                 
                 <div class="card-header">
@@ -381,22 +376,16 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
                     </span>
                 </div>
 
-                    <div class="sprite-container">
+                <div class="sprite-container">
                     <?php 
-                    // 1. Usamos el ID único del Pokémon para fijar el azar
                     srand($p->getId()); 
                     $idVisualFijo = rand(1, 1025); 
-                    
-                    // 2. IMPORTANTE: Reseteamos la semilla para no afectar a otros procesos de PHP
                     srand(); 
 
-                    if($p->getShiny()): 
-                    ?>
+                    if($p->getShiny()): ?>
                         <div class="particles">✨</div>
-                        <!-- Sprite Shiny Aleatorio (pero fijo para este ID) -->
                         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/<?php echo $idVisualFijo; ?>.png" alt="Sprite Shiny" class="pkmn-sprite">
                     <?php else: ?>
-                        <!-- Arte Oficial Aleatorio (pero fijo para este ID) -->
                         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/<?php echo $idVisualFijo; ?>.png" alt="Arte Oficial" class="pkmn-sprite">
                     <?php endif; ?>
                 </div>
@@ -416,18 +405,12 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
 
                 <div class="stats-grid">
                     <?php 
-                    // Mapeo de nombres de la base de datos a siglas clásicas
                     $siglas = [
-                        'hp'              => 'HP',
-                        'ataque'          => 'ATT',
-                        'defensa'         => 'DEF',
-                        'ataqueEspecial'  => 'S.ATT',
-                        'defensaEspecial' => 'S.DEF',
-                        'velocidad'       => 'VEL'
+                        'hp' => 'HP', 'ataque' => 'ATT', 'defensa' => 'DEF',
+                        'ataqueEspecial' => 'S.ATT', 'defensaEspecial' => 'S.DEF', 'velocidad' => 'VEL'
                     ];
 
                     foreach ($p->getStats() as $nombre => $valor): 
-                        // Usamos la sigla definida o el nombre en mayúsculas como plan B
                         $etiqueta = $siglas[$nombre] ?? strtoupper($nombre);
                     ?>
                         <div class="stat-item">
@@ -436,23 +419,25 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
                         </div>
                     <?php endforeach; ?>
                 </div>
-<div class="card-actions">
-    <?php 
-    // Ahora permitimos gestionar si es el DUEÑO o si tiene rango de ADMIN
-    $esSuEntrenador = (isset($_SESSION['entrenador_id']) && $p->getEntrenadorId() == $_SESSION['entrenador_id']);
-    $esAdmin  = (isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1);
 
-    if ($esSuEntrenador || $esAdmin): 
-    ?>
-        <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>" class="action-link" title="Editar Mote">📝</a>
-        <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>" 
-           class="action-link" 
-           onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
-           title="Liberar">🗑️</a>
-    <?php else: ?>
-        <span style="color: #ccc; font-size: 0.7em;">Solo lectura</span>
-    <?php endif; ?>
-</div>
+                <div class="card-actions">
+                    <?php 
+                    $esSuEntrenador = (isset($_SESSION['entrenador_id']) && $p->getEntrenadorId() == $_SESSION['entrenador_id']);
+                    $esAdmin  = (isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1);
+
+                    if ($esSuEntrenador || $esAdmin): ?>
+                        <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>" class="action-link" title="Editar Mote">📝</a>
+                        <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>" 
+                           class="action-link" 
+                           onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
+                           title="Liberar">🗑️</a>
+                    <?php else: ?>
+                        <span style="color: #ccc; font-size: 0.7em;">Solo lectura</span>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
