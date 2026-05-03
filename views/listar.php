@@ -487,10 +487,8 @@ $bg_color = $_COOKIE['pokedex_color'] ?? 'f4f4f9';
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
- <!-- Aquí termina tu cuadrícula de Pokémon -->
-<!-- =============================================
-     BLOQUE DE PAGINACIÓN (Añadir aquí)
-     ============================================= -->
+ <!-- Paginador -->
+
 <div class="pagination-container">
     <?php if ($paginaActual > 1): ?>
         <a href="index.php?page=<?php echo $paginaActual - 1; ?>" class="btn-nav">« Anterior</a>

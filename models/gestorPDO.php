@@ -85,13 +85,17 @@ public function agregar(pkmn $p, int $idEntrenador) {
 public function buscar($id) {
     $sql = "SELECT * FROM pokemon WHERE id = :id";
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(':id', $id);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
 
     if ($value = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Reconstruimos el objeto según su rareza
-        // Nota: Asegúrate de que $value['rareza'] coincida con tus clases (Comun, Legendario, etc.)
-        $nombreClase = "Pkmn" . ucfirst($value['rareza']); 
+        // uso strtolower para evitar errores de mayúsculas en la BD
+        $nombreClase = "Pkmn" . ucfirst(strtolower($value['rareza'])); 
+
+        if (!class_exists($nombreClase)) {
+             // Por seguridad, si la clase no existe, podrías usar una por defecto o lanzar error
+             $nombreClase = "PkmnComun"; 
+        }
 
         $p = new $nombreClase($value['nombre'], $value['tipo1'], $value['tipo2']);
         
@@ -104,13 +108,7 @@ public function buscar($id) {
             'velocidad' => $value['velocidad']
         ];
 
-        $p->setDatosRelatados(
-            $value['id'], 
-            $stats, 
-            $value['shiny'], 
-            $value['rareza'], 
-            $value['entrenador_id']
-        );
+        $p->setDatosRelatados($value['id'], $stats, $value['shiny'], $value['rareza'], $value['entrenador_id']);
         
         return $p;
     }

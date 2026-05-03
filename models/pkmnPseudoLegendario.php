@@ -1,5 +1,5 @@
 <?php
-class PkmnPseudoLegendario extends Pkmn {
+class PkmnPseudolegendario extends Pkmn {
 
     protected function getPuntosClase() {return 550;}
     protected function getRarezaNombre(){ return "PseudoLegendario";}
