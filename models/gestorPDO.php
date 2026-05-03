@@ -7,13 +7,20 @@ class GestorPDO {
         $this -> db = Connection::getInstance()->getConn();
     }
 
-public function listar() {
+// Añadimos parámetros con valores por defecto (8 por página, empezando desde el principio)
+public function listar($limite = 8, $offset = 0) {
     $arrayPkmn = [];
-    $consulta = "SELECT * FROM pokemon";
-    $rtdo = $this->db->query($consulta);
+    
+    // Cambiamos query() por prepare() para poder usar parámetros de forma segura
+    $consulta = "SELECT * FROM pokemon LIMIT :limite OFFSET :offset";
+    $stmt = $this->db->prepare($consulta);
 
-    while ($value = $rtdo->fetch(PDO::FETCH_ASSOC)) {
-        // Instanciamos la clase hija según la rareza 
+    // CRÍTICO: LIMIT y OFFSET necesitan ser tratados como enteros (PARAM_INT)
+    $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    $stmt->execute();
+
+    while ($value = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $nombreClase = "Pkmn" . ucfirst(strtolower($value['rareza'])); 
         $p = new $nombreClase($value['nombre'], $value['tipo1'], $value['tipo2']);
 
@@ -26,7 +33,6 @@ public function listar() {
             'velocidad' => $value['velocidad']
         ];
 
-
         $p->setDatosRelatados(
             $value['id'], 
             $statsRecuperados, 
@@ -38,6 +44,12 @@ public function listar() {
         $arrayPkmn[] = $p;
     }
     return $arrayPkmn;
+}
+
+public function contarTotal() {
+    $consulta = "SELECT COUNT(*) FROM pokemon";
+    $resultado = $this->db->query($consulta);
+    return $resultado->fetchColumn(); // Devuelve el número total de filas
 }
 
 public function agregar(pkmn $p, int $idEntrenador) {

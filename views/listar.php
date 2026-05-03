@@ -321,6 +321,48 @@ $bg_color = $_COOKIE['pokedex_color'] ?? 'f4f4f9';
     .action-link:hover {
         transform: scale(1.2);
     }
+
+     .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin: 40px 0;
+        padding-bottom: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .btn-nav {
+        padding: 10px 20px;
+        background-color: #ff1f1f; /* Rojo Pokémon */
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-nav:hover:not(.disabled) {
+        background-color: #c00;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-nav.disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .page-info {
+        font-size: 1.1em;
+        color: #444;
+        background: white;
+        padding: 8px 15px;
+        border-radius: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
 </style>
 </head>
 <body>
@@ -426,11 +468,15 @@ $bg_color = $_COOKIE['pokedex_color'] ?? 'f4f4f9';
                     $esAdmin  = (isset($_SESSION['es_admin']) && $_SESSION['es_admin'] == 1);
 
                     if ($esSuEntrenador || $esAdmin): ?>
-                        <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>" class="action-link" title="Editar Mote">📝</a>
-                        <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>" 
-                           class="action-link" 
-                           onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
-                           title="Liberar">🗑️</a>
+                        <!-- Enviamos el ID del Pokémon Y la página actual -->
+                        <a href="index.php?accion=editar&id=<?php echo $p->getId(); ?>&page=<?php echo $paginaActual; ?>" 
+                        class="action-link" 
+                        title="Editar Mote">📝</a>
+                        
+                        <a href="index.php?accion=eliminar&id=<?php echo $p->getId(); ?>&page=<?php echo $paginaActual; ?>" 
+                        class="action-link" 
+                        onclick="return confirm('¿Seguro que quieres liberar a <?php echo $p->getNombre(); ?>?')" 
+                        title="Liberar">🗑️</a>
                     <?php else: ?>
                         <span style="color: #ccc; font-size: 0.7em;">Solo lectura</span>
                     <?php endif; ?>
@@ -441,6 +487,30 @@ $bg_color = $_COOKIE['pokedex_color'] ?? 'f4f4f9';
         <?php endforeach; ?>
     <?php endif; ?>
 </main>
+ <!-- Aquí termina tu cuadrícula de Pokémon -->
+<!-- =============================================
+     BLOQUE DE PAGINACIÓN (Añadir aquí)
+     ============================================= -->
+<div class="pagination-container">
+    <?php if ($paginaActual > 1): ?>
+        <a href="index.php?page=<?php echo $paginaActual - 1; ?>" class="btn-nav">« Anterior</a>
+    <?php else: ?>
+        <span class="btn-nav disabled">« Anterior</span>
+    <?php endif; ?>
+
+    <div class="page-info">
+        Página <strong><?php echo $paginaActual; ?></strong> de <strong><?php echo $totalPaginas; ?></strong>
+    </div>
+
+    <?php if ($paginaActual < $totalPaginas): ?>
+        <a href="index.php?page=<?php echo $paginaActual + 1; ?>" class="btn-nav">Siguiente »</a>
+    <?php else: ?>
+        <span class="btn-nav disabled">Siguiente »</span>
+    <?php endif; ?>
+</div>
+
+</body>
+</html> 
 
 </body>
 </html>

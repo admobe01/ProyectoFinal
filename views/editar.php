@@ -73,7 +73,6 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
 
 <div class="card">
     <div class="pkmn-preview">
-        <!-- Reutilizamos la lógica del ID visual para que el usuario sepa a quién edita -->
         <?php 
             srand($pkmn->getId());
             $idVisual = rand(1, 1025);
@@ -85,15 +84,16 @@ $bg_color = $_COOKIE['pokedex_color'] ?? '#f4f4f9';
     <h2>Editar Mote</h2>
     <p>Estás editando a <strong><?php echo $pkmn->getNombre(); ?></strong></p>
 
-    <!-- El formulario envía los datos al controlador mediante POST -->
-    <form action="index.php?accion=editar&id=<?php echo $pkmn->getId(); ?>" method="POST">
+    <!-- CAMBIO 1: Añadimos &page al action del formulario[cite: 1] -->
+    <form action="index.php?accion=editar&id=<?php echo $pkmn->getId(); ?>&page=<?php echo $paginaOrigen; ?>" method="POST">
         <label for="nombre" style="display:block; text-align:left; font-size: 0.8em; color: #888;">NUEVO NOMBRE:</label>
         <input type="text" name="nombre" id="nombre" value="<?php echo $pkmn->getNombre(); ?>" required autofocus>
         
         <button type="submit" class="btn-save">Guardar Cambios</button>
     </form>
 
-    <a href="index.php" class="cancel-link">Volver sin cambios</a>
+    <!-- CAMBIO 2: Añadimos ?page al enlace de cancelar[cite: 1] -->
+    <a href="index.php?page=<?php echo $paginaOrigen; ?>" class="cancel-link">Volver sin cambios</a>
 </div>
 
 </body>
